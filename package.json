@@ -1,0 +1,42 @@
+{
+  "name": "minimax-bridge-mcp",
+  "version": "0.2.0",
+  "description": "A publishable MiniMax bridge MCP server with one-command OpenCode install scripts and cross-platform release bundles.",
+  "type": "module",
+  "bin": {
+    "minimax-bridge-mcp": "./dist/index.js"
+  },
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "manifest": "node dist/index.js --manifest",
+    "tools": "node dist/index.js --tools",
+    "install:opencode": "node scripts/install-opencode.mjs",
+    "release:local": "node scripts/make-release.mjs",
+    "prepare:release": "npm run build && node scripts/generate-agent-manifest.mjs && npm run release:local"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "ws": "^8.18.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.0",
+    "@types/ws": "^8.5.12",
+    "tsx": "^4.19.0",
+    "typescript": "^5.8.0"
+  },
+  "files": [
+    "dist",
+    "scripts",
+    "examples",
+    "docs",
+    "agent.manifest.json",
+    "README.md",
+    "LICENSE"
+  ]
+}

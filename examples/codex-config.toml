@@ -1,0 +1,11 @@
+[mcp_servers.minimax_bridge]
+command = "node"
+args = ["/absolute/path/to/minimax-bridge-mcp/dist/index.js"]
+
+[mcp_servers.minimax_bridge.env]
+MINIMAX_API_KEY = "your_minimax_api_key"
+MINIMAX_API_HOST = "https://api.minimaxi.com"
+MINIMAX_MCP_BASE_PATH = "/absolute/path/to/outputs/minimax"
+MINIMAX_T2A_MODE = "async"
+MINIMAX_ENABLE_TOKEN_PLAN_PROXY = "true"
+MINIMAX_PLAN_API_KEY = "your_token_plan_key_or_same_key"
