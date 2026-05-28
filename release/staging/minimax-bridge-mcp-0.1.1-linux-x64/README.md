@@ -1,237 +1,104 @@
 # minimax-bridge-mcp
 
-一个可发布的 MiniMax Bridge MCP 服务器，适用于 Redou、OpenCode、Codex 及其他兼容 MCP 的智能体。
+> 专为 MiniMax Token Plan 用户打造的 MCP 服务器，让 OpenCode、Codex 等 AI 编程助手直接调用 MiniMax 的全部 AI 能力。
 
-智能体看到的是**一个 MCP 服务器**。内部桥接将不同的工具路由到不同的 MiniMax 后端：
+## 这是什么？
 
-```text
-Agent / Redou / OpenCode / Codex
-  ↓ MCP tools/list + tools/call
-minimax-bridge-mcp
-  ├─ Token Plan MCP 代理分支
-  │    ├─ web_search
-  │    └─ understand_image
-  └─ MiniMax HTTP/WebSocket 分支
-       ├─ text_to_audio / voice_clone / list_voices
-       ├─ text_to_image
-       ├─ generate_video / image_to_video / video templates
-       └─ lyrics_generation / music_generation / music cover
+一个桥接服务器，将 MiniMax 的 API 能力（文生图、文生语音、视频生成、音乐创作等）封装成 MCP 工具，让 AI 编程助手可以像使用内置工具一样调用。
+
+**支持的工具：**
+- 文生图 / 文生语音 / 语音克隆
+- 视频生成 / 图生视频
+- 音乐创作 / 歌词生成
+- 网页搜索 / 图片理解
+
+## 快速安装
+
+### 前提条件
+
+- Node.js 20+ ([下载](https://nodejs.org/))
+- MiniMax API Key
+
+### 一键安装
+
+**Windows：**
+```powershell
+# 下载解压后，双击 install.bat 即可
 ```
 
-## 工具列表
-
-- `web_search`
-- `understand_image`
-- `text_to_audio`
-- `query_text_to_audio`
-- `list_voices`
-- `voice_clone`
-- `text_to_image`
-- `generate_video`
-- `image_to_video`
-- `query_video_generation`
-- `video_template_generation`
-- `query_video_template_generation`
-- `lyrics_generation`
-- `music_generation`
-- `music_cover_preprocess`
-
-## 要求
-
-- Node.js 20+
-- MiniMax API 密钥
-- 可选：如果启用 Token Plan MCP 代理分支，则需要 `uvx`
-
-## 快速安装到 OpenCode
-
-### 一键安装（推荐）
-
-**Windows 用户：**
-
-1. 下载并解压 `minimax-bridge-mcp-0.1.1-win-x64.zip`
-2. 双击运行 `install.bat`
-3. 按提示输入您的 MiniMax API Key
-4. 重启 OpenCode 即可使用
-
-**macOS / Linux 用户：**
-
-1. 下载并解压对应平台的压缩包
-2. 打开终端，进入解压目录
-3. 执行以下命令：
-
+**macOS / Linux：**
 ```bash
 chmod +x install.sh
 ./install.sh
 ```
 
-4. 按提示输入您的 MiniMax API Key
-5. 重启 OpenCode 即可使用
+安装脚本会自动检测环境、安装依赖、配置 OpenCode。
 
 ### 手动安装
-
-#### Windows
-
-```powershell
-cd D:\Redou\plugins\minimax-bridge-mcp
-$env:MINIMAX_API_KEY="your_minimax_api_key"
-.\install-opencode.ps1 -Yes
-```
-
-#### macOS / Linux
-
-```bash
-cd ~/redou/plugins/minimax-bridge-mcp
-export MINIMAX_API_KEY="your_minimax_api_key"
-./install-opencode.sh --yes
-```
-
-脚本将 MCP 配置写入：
-
-```text
-~/.config/opencode/opencode.json
-```
-
-然后重启 OpenCode。
-
-详细指南和操作图：[docs/OPENCODE_INSTALL.md](docs/OPENCODE_INSTALL.md)
-
-## 手动安装
 
 ```bash
 npm install
 npm run build
+node scripts/install-opencode.mjs --apiKey YOUR_API_KEY --yes
 ```
 
-仅用于本地诊断运行：
+## 使用示例
 
-```bash
-node dist/index.js
+安装完成后，重启 OpenCode，即可在对话中使用 MiniMax 的能力。
+
+### 示例 1：文生图
+
+```
+用户：帮我生成一张赛博朋克风格的城市夜景图
+OpenCode：[调用 text_to_image 工具]
 ```
 
-这是一个 stdio MCP 服务器，不是浏览器 HTTP 服务。正常使用时，智能体会自动启动和停止它。
+### 示例 2：文生语音
 
-## 智能体清单
-
-对于 Redou 风格的插件商店或安装程序，项目公开了一个清单接口：
-
-```bash
-node dist/index.js --manifest
+```
+用户：把这段代码的注释用语音读出来
+OpenCode：[调用 text_to_audio 工具]
 ```
 
-仅工具模式：
+### 示例 3：视频生成
 
-```bash
-node dist/index.js --tools
+```
+用户：根据这个动画效果生成一个演示视频
+OpenCode：[调用 generate_video 工具]
 ```
 
-发布构建还包括：
+### 示例 4：网页搜索
 
-```text
-agent.manifest.json
+```
+用户：搜索一下最新的 React 19 有什么新特性
+OpenCode：[调用 web_search 工具]
 ```
 
-这可以让智能体了解：
+## 配置说明
 
-- 服务 ID 和显示名称
-- 启动命令和环境变量
-- 生命周期策略
-- 可用的 MCP 工具
-- 所需权限
-- 工件类型
-
-## 环境变量
-
-```bash
-# HTTP/WebSocket 分支必需
-export MINIMAX_API_KEY="your_minimax_api_key"
-
-# 可选
-export MINIMAX_API_HOST="https://api.minimaxi.com"
-export MINIMAX_MCP_BASE_PATH="./outputs/minimax"
-export MINIMAX_T2A_MODE="async"          # async | websocket
-export MINIMAX_POLL_INTERVAL_SECONDS="10"
-export MINIMAX_MAX_WAIT_SECONDS="600"
-
-# Token Plan MCP 代理分支
-export MINIMAX_ENABLE_TOKEN_PLAN_PROXY="false"
-export MINIMAX_PLAN_API_KEY="your_token_plan_key_or_same_key"
-export MINIMAX_PLAN_MCP_COMMAND="uvx"
-export MINIMAX_PLAN_MCP_ARGS='["minimax-coding-plan-mcp", "-y"]'
-```
-
-## OpenCode 配置示例
+安装脚本会自动将以下配置写入 `~/.config/opencode/opencode.json`：
 
 ```json
 {
-  "$schema": "https://opencode.ai/config.json",
   "mcp": {
     "minimax-bridge": {
       "type": "local",
-      "command": ["node", "/absolute/path/to/minimax-bridge-mcp/dist/index.js"],
+      "command": ["node", "/path/to/minimax-bridge-mcp/dist/index.js"],
       "enabled": true,
       "environment": {
-        "MINIMAX_API_KEY": "your_minimax_api_key",
-        "MINIMAX_API_HOST": "https://api.minimaxi.com",
-        "MINIMAX_MCP_BASE_PATH": "/absolute/path/to/outputs/minimax",
-        "MINIMAX_T2A_MODE": "async",
-        "MINIMAX_ENABLE_TOKEN_PLAN_PROXY": "false"
+        "MINIMAX_API_KEY": "your_api_key"
       }
     }
   }
 }
 ```
 
-## Codex 配置示例
+如需修改配置，可编辑该文件。
 
-```toml
-[mcp_servers.minimax_bridge]
-command = "node"
-args = ["/absolute/path/to/minimax-bridge-mcp/dist/index.js"]
+## 相关链接
 
-[mcp_servers.minimax_bridge.env]
-MINIMAX_API_KEY = "your_minimax_api_key"
-MINIMAX_API_HOST = "https://api.minimaxi.com"
-MINIMAX_MCP_BASE_PATH = "/absolute/path/to/outputs/minimax"
-MINIMAX_T2A_MODE = "async"
-MINIMAX_ENABLE_TOKEN_PLAN_PROXY = "false"
-```
-
-## GitHub 发布构建
-
-本仓库包含：
-
-```text
-.github/workflows/release.yml
-scripts/make-release.mjs
-scripts/generate-agent-manifest.mjs
-```
-
-当推送标签时，GitHub Actions 会构建发布包：
-
-```bash
-git tag v0.2.0
-git push origin v0.2.0
-```
-
-生成的工件：
-
-```text
-minimax-bridge-mcp-0.2.0-win-x64.zip
-minimax-bridge-mcp-0.2.0-macos-universal.tar.gz
-minimax-bridge-mcp-0.2.0-linux-x64.tar.gz
-```
-
-本地发布构建：
-
-```bash
-npm run prepare:release
-```
-
-输出写入：
-
-```text
-release/
-```
+- [详细安装指南](docs/OPENCODE_INSTALL.md)
+- [GitHub Releases](https://github.com/herb711/minimax-bridge-mcp/releases)
 
 ---
 
@@ -239,235 +106,102 @@ release/
 
 # minimax-bridge-mcp
 
-A publishable MiniMax Bridge MCP server for Redou, OpenCode, Codex and other MCP-compatible agents.
+> A bridge server that brings MiniMax's AI capabilities (text-to-image, text-to-speech, video generation, music creation, etc.) to AI coding assistants like OpenCode and Codex via MCP protocol.
 
-The agent sees **one MCP server**. Internally, this bridge routes different tools to different MiniMax backends:
+## What is this?
 
-```text
-Agent / Redou / OpenCode / Codex
-  ↓ MCP tools/list + tools/call
-minimax-bridge-mcp
-  ├─ Token Plan MCP proxy branch
-  │    ├─ web_search
-  │    └─ understand_image
-  └─ MiniMax HTTP/WebSocket branch
-       ├─ text_to_audio / voice_clone / list_voices
-       ├─ text_to_image
-       ├─ generate_video / image_to_video / video templates
-       └─ lyrics_generation / music_generation / music cover
+A bridge server that wraps MiniMax's APIs as MCP tools, allowing AI coding assistants to use MiniMax's capabilities as if they were built-in tools.
+
+**Supported tools:**
+- Text-to-Image / Text-to-Speech / Voice Cloning
+- Video Generation / Image-to-Video
+- Music Creation / Lyrics Generation
+- Web Search / Image Understanding
+
+## Quick Install
+
+### Prerequisites
+
+- Node.js 20+ ([Download](https://nodejs.org/))
+- MiniMax API Key
+
+### One-click Install
+
+**Windows:**
+```powershell
+# After downloading and extracting, double-click install.bat
 ```
 
-## Tool list
-
-- `web_search`
-- `understand_image`
-- `text_to_audio`
-- `query_text_to_audio`
-- `list_voices`
-- `voice_clone`
-- `text_to_image`
-- `generate_video`
-- `image_to_video`
-- `query_video_generation`
-- `video_template_generation`
-- `query_video_template_generation`
-- `lyrics_generation`
-- `music_generation`
-- `music_cover_preprocess`
-
-## Requirements
-
-- Node.js 20+
-- MiniMax API key
-- Optional: `uvx` if you enable the Token Plan MCP proxy branch
-
-## Quick install into OpenCode
-
-### One-click install (Recommended)
-
-**Windows users:**
-
-1. Download and extract `minimax-bridge-mcp-0.1.1-win-x64.zip`
-2. Double-click `install.bat`
-3. Enter your MiniMax API Key when prompted
-4. Restart OpenCode and start using
-
-**macOS / Linux users:**
-
-1. Download and extract the appropriate package for your platform
-2. Open terminal and navigate to the extracted directory
-3. Run the following commands:
-
+**macOS / Linux:**
 ```bash
 chmod +x install.sh
 ./install.sh
 ```
 
-4. Enter your MiniMax API Key when prompted
-5. Restart OpenCode and start using
+The install script automatically detects the environment, installs dependencies, and configures OpenCode.
 
-### Manual install
-
-#### Windows
-
-```powershell
-cd D:\Redou\plugins\minimax-bridge-mcp
-$env:MINIMAX_API_KEY="your_minimax_api_key"
-.\install-opencode.ps1 -Yes
-```
-
-#### macOS / Linux
-
-```bash
-cd ~/redou/plugins/minimax-bridge-mcp
-export MINIMAX_API_KEY="your_minimax_api_key"
-./install-opencode.sh --yes
-```
-
-The script writes the MCP config to:
-
-```text
-~/.config/opencode/opencode.json
-```
-
-Then restart OpenCode.
-
-Detailed guide with operation diagrams: [docs/OPENCODE_INSTALL.md](docs/OPENCODE_INSTALL.md)
-
-## Manual install
+### Manual Install
 
 ```bash
 npm install
 npm run build
+node scripts/install-opencode.mjs --apiKey YOUR_API_KEY --yes
 ```
 
-Run locally for diagnostics only:
+## Usage Examples
 
-```bash
-node dist/index.js
+After installation, restart OpenCode and you can use MiniMax's capabilities in your conversations.
+
+### Example 1: Text-to-Image
+
+```
+User: Generate a cyberpunk city nightscape image
+OpenCode: [calls text_to_image tool]
 ```
 
-This is a stdio MCP server, not a browser HTTP service. In normal use, the agent starts and stops it automatically.
+### Example 2: Text-to-Speech
 
-## Agent manifest
-
-For Redou-style plugin stores or installers, the project exposes a manifest interface:
-
-```bash
-node dist/index.js --manifest
+```
+User: Read the code comments aloud
+OpenCode: [calls text_to_audio tool]
 ```
 
-Tool schema only:
+### Example 3: Video Generation
 
-```bash
-node dist/index.js --tools
+```
+User: Generate a demo video based on this animation effect
+OpenCode: [calls generate_video tool]
 ```
 
-The release build also includes:
+### Example 4: Web Search
 
-```text
-agent.manifest.json
+```
+User: Search for the latest React 19 features
+OpenCode: [calls web_search tool]
 ```
 
-This lets an agent know:
+## Configuration
 
-- service id and display name
-- start command and environment variables
-- lifecycle strategy
-- available MCP tools
-- required permissions
-- artifact types
-
-## Environment variables
-
-```bash
-# Required for HTTP/WebSocket branch
-export MINIMAX_API_KEY="your_minimax_api_key"
-
-# Optional
-export MINIMAX_API_HOST="https://api.minimaxi.com"
-export MINIMAX_MCP_BASE_PATH="./outputs/minimax"
-export MINIMAX_T2A_MODE="async"          # async | websocket
-export MINIMAX_POLL_INTERVAL_SECONDS="10"
-export MINIMAX_MAX_WAIT_SECONDS="600"
-
-# Token Plan MCP proxy branch
-export MINIMAX_ENABLE_TOKEN_PLAN_PROXY="false"
-export MINIMAX_PLAN_API_KEY="your_token_plan_key_or_same_key"
-export MINIMAX_PLAN_MCP_COMMAND="uvx"
-export MINIMAX_PLAN_MCP_ARGS='["minimax-coding-plan-mcp", "-y"]'
-```
-
-## OpenCode config example
+The install script automatically writes the following config to `~/.config/opencode/opencode.json`:
 
 ```json
 {
-  "$schema": "https://opencode.ai/config.json",
   "mcp": {
     "minimax-bridge": {
       "type": "local",
-      "command": ["node", "/absolute/path/to/minimax-bridge-mcp/dist/index.js"],
+      "command": ["node", "/path/to/minimax-bridge-mcp/dist/index.js"],
       "enabled": true,
       "environment": {
-        "MINIMAX_API_KEY": "your_minimax_api_key",
-        "MINIMAX_API_HOST": "https://api.minimaxi.com",
-        "MINIMAX_MCP_BASE_PATH": "/absolute/path/to/outputs/minimax",
-        "MINIMAX_T2A_MODE": "async",
-        "MINIMAX_ENABLE_TOKEN_PLAN_PROXY": "false"
+        "MINIMAX_API_KEY": "your_api_key"
       }
     }
   }
 }
 ```
 
-## Codex config example
+To modify the configuration, edit this file.
 
-```toml
-[mcp_servers.minimax_bridge]
-command = "node"
-args = ["/absolute/path/to/minimax-bridge-mcp/dist/index.js"]
+## Links
 
-[mcp_servers.minimax_bridge.env]
-MINIMAX_API_KEY = "your_minimax_api_key"
-MINIMAX_API_HOST = "https://api.minimaxi.com"
-MINIMAX_MCP_BASE_PATH = "/absolute/path/to/outputs/minimax"
-MINIMAX_T2A_MODE = "async"
-MINIMAX_ENABLE_TOKEN_PLAN_PROXY = "false"
-```
-
-## GitHub release build
-
-This repository includes:
-
-```text
-.github/workflows/release.yml
-scripts/make-release.mjs
-scripts/generate-agent-manifest.mjs
-```
-
-When you push a tag, GitHub Actions builds release bundles:
-
-```bash
-git tag v0.2.0
-git push origin v0.2.0
-```
-
-Generated artifacts:
-
-```text
-minimax-bridge-mcp-0.2.0-win-x64.zip
-minimax-bridge-mcp-0.2.0-macos-universal.tar.gz
-minimax-bridge-mcp-0.2.0-linux-x64.tar.gz
-```
-
-For a local release build:
-
-```bash
-npm run prepare:release
-```
-
-Outputs are written to:
-
-```text
-release/
-```
+- [Detailed Installation Guide](docs/OPENCODE_INSTALL.md)
+- [GitHub Releases](https://github.com/herb711/minimax-bridge-mcp/releases)
