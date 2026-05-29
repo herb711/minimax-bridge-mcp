@@ -56,9 +56,16 @@ export declare function getAgentManifest(): {
     };
     capabilities: {
         tools: {
-            name: any;
-            description: any;
-            inputSchema: any;
+            name: string;
+            description: string | undefined;
+            inputSchema: {
+                [x: string]: unknown;
+                type: "object";
+                properties?: {
+                    [x: string]: object;
+                } | undefined;
+                required?: string[] | undefined;
+            };
         }[];
         artifacts: string[];
         providers: string[];

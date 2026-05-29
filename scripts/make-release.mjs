@@ -13,7 +13,7 @@ fs.mkdirSync(stagingRoot, { recursive: true });
 const commonFiles = [
   'dist', 'scripts', 'examples', 'docs', 'agent.manifest.json',
   'README.md', 'package.json', 'package-lock.json', 'tsconfig.json',
-  'install-opencode.sh', 'install-opencode.ps1', 'install.bat', 'install.sh'
+  'install-opencode.sh', 'install-opencode.ps1'
 ];
 
 function copy(src, dst) {
@@ -34,7 +34,7 @@ function makeBundle(platform) {
   for (const file of commonFiles) {
     if (fs.existsSync(file)) copy(file, path.join(dir, file));
   }
-  fs.writeFileSync(path.join(dir, 'INSTALL_FIRST.txt'), `MiniMax Bridge MCP ${pkg.version}\n\n═══════════════════════════════════════════════════════════════\n  一键安装指南\n═══════════════════════════════════════════════════════════════\n\n前提条件：\n  - 已安装 Node.js 20 或更高版本 (https://nodejs.org/)\n\nWindows 用户：\n  双击运行 install.bat，然后按提示输入 API Key 即可。\n\nmacOS / Linux 用户：\n  打开终端，执行以下命令：\n    chmod +x install.sh\n    ./install.sh\n  然后按提示输入 API Key 即可。\n\n安装完成后：\n  重启 OpenCode，即可使用 MiniMax 的各种 AI 工具。\n\n这是一个 stdio MCP 服务器，OpenCode 会自动启动和管理它。\n\n详细文档请查看 README.md\n`);
+  fs.writeFileSync(path.join(dir, 'INSTALL_FIRST.txt'), `MiniMax Bridge MCP ${pkg.version}\n\n1. Ensure Node.js 20+ is installed.\n2. Run ./install-opencode.sh on macOS/Linux or .\\install-opencode.ps1 on Windows.\n3. Restart OpenCode.\n\nThis is a stdio MCP server. The agent starts it automatically from its MCP config.\n`);
   return { dir, dirName };
 }
 

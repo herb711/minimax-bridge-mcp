@@ -2,4 +2,3 @@ node_modules/
 outputs/
 .env
 .DS_Store
-release/staging/
