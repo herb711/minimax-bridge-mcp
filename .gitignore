@@ -3,3 +3,4 @@ outputs/
 .env
 .DS_Store
 release/staging/
+测试apikey不要放入git.txt

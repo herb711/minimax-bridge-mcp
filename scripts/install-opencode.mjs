@@ -40,6 +40,30 @@ function ensureDir(dir) { fs.mkdirSync(dir, { recursive: true }); }
 
 function posixOrWinPath(p) { return path.resolve(p); }
 
+function createEnvironment({ apiKey, apiHost, basePath, t2aMode, enableTokenPlan, planApiKey, planCommand, planArgs }) {
+  return {
+    ...(apiKey ? { MINIMAX_API_KEY: apiKey } : {}),
+    MINIMAX_API_HOST: apiHost,
+    MINIMAX_MCP_BASE_PATH: basePath,
+    MINIMAX_T2A_MODE: t2aMode,
+    MINIMAX_ENABLE_TOKEN_PLAN_PROXY: enableTokenPlan,
+    ...(enableTokenPlan === 'true' ? {
+      ...(planApiKey || apiKey ? { MINIMAX_PLAN_API_KEY: planApiKey || apiKey } : {}),
+      MINIMAX_PLAN_MCP_COMMAND: planCommand,
+      MINIMAX_PLAN_MCP_ARGS: planArgs,
+    } : {}),
+  };
+}
+
+function createMcpEntry(entry, environment) {
+  return {
+    type: 'local',
+    command: ['node', entry],
+    enabled: true,
+    environment,
+  };
+}
+
 const args = parseArgs(process.argv);
 const nonInteractive = Boolean(args.yes || args.y);
 const configPath = posixOrWinPath(args.config || defaultOpenCodeConfigPath());
@@ -53,25 +77,22 @@ if (!fs.existsSync(entry)) {
   process.exit(1);
 }
 
-let apiKey = args.apiKey || process.env.MINIMAX_API_KEY || '';
+let apiKey = args.apiKey || '';
 let basePath = args.basePath || process.env.MINIMAX_MCP_BASE_PATH || path.join(installDir, 'outputs', 'minimax');
 let enableTokenPlan = String(args.tokenPlan ?? process.env.MINIMAX_ENABLE_TOKEN_PLAN_PROXY ?? 'false');
-let planApiKey = args.planApiKey || process.env.MINIMAX_PLAN_API_KEY || '';
+let planApiKey = args.planApiKey || '';
+const apiHost = args.apiHost || process.env.MINIMAX_API_HOST || 'https://api.minimaxi.com';
+const t2aMode = args.t2aMode || process.env.MINIMAX_T2A_MODE || 'async';
+const planCommand = args.planCommand || process.env.MINIMAX_PLAN_MCP_COMMAND || 'uvx';
+const planArgs = args.planArgs || process.env.MINIMAX_PLAN_MCP_ARGS || '["minimax-coding-plan-mcp", "-y"]';
 
 if (!nonInteractive) {
   const rl = readline.createInterface({ input, output });
-  if (!apiKey) apiKey = await rl.question('MiniMax API Key: ');
   const baseAns = await rl.question(`Artifact output directory [${basePath}]: `);
   if (baseAns.trim()) basePath = baseAns.trim();
   const tokenAns = await rl.question(`Enable Token Plan MCP proxy? true/false [${enableTokenPlan}]: `);
   if (tokenAns.trim()) enableTokenPlan = tokenAns.trim();
-  if (enableTokenPlan === 'true' && !planApiKey) planApiKey = await rl.question('MiniMax Token Plan API Key: ');
   rl.close();
-}
-
-if (!apiKey) {
-  console.error('MINIMAX_API_KEY is required. Pass --apiKey or set the environment variable.');
-  process.exit(1);
 }
 
 ensureDir(path.dirname(configPath));
@@ -79,23 +100,8 @@ const config = readJsonC(configPath);
 config.$schema ||= 'https://opencode.ai/config.json';
 config.mcp ||= {};
 
-config.mcp['minimax-bridge'] = {
-  type: 'local',
-  command: ['node', entry],
-  enabled: true,
-  environment: {
-    MINIMAX_API_KEY: apiKey,
-    MINIMAX_API_HOST: args.apiHost || process.env.MINIMAX_API_HOST || 'https://api.minimaxi.com',
-    MINIMAX_MCP_BASE_PATH: basePath,
-    MINIMAX_T2A_MODE: args.t2aMode || process.env.MINIMAX_T2A_MODE || 'async',
-    MINIMAX_ENABLE_TOKEN_PLAN_PROXY: enableTokenPlan,
-    ...(enableTokenPlan === 'true' ? {
-      MINIMAX_PLAN_API_KEY: planApiKey || apiKey,
-      MINIMAX_PLAN_MCP_COMMAND: args.planCommand || process.env.MINIMAX_PLAN_MCP_COMMAND || 'uvx',
-      MINIMAX_PLAN_MCP_ARGS: args.planArgs || process.env.MINIMAX_PLAN_MCP_ARGS || '["minimax-coding-plan-mcp", "-y"]',
-    } : {}),
-  },
-};
+const environment = createEnvironment({ apiKey, apiHost, basePath, t2aMode, enableTokenPlan, planApiKey, planCommand, planArgs });
+config.mcp['minimax-bridge'] = createMcpEntry(entry, environment);
 
 if (fs.existsSync(configPath)) {
   const backup = `${configPath}.bak-${new Date().toISOString().replace(/[:.]/g, '-')}`;
@@ -104,4 +110,8 @@ if (fs.existsSync(configPath)) {
 }
 fs.writeFileSync(configPath, JSON.stringify(config, null, 2) + '\n');
 console.log(`Installed minimax-bridge MCP into OpenCode config: ${configPath}`);
-console.log('Restart OpenCode, then ask it to list MCP tools or use text_to_image/text_to_audio.');
+if (!apiKey) {
+  console.log('No MiniMax API key was written. Configure MINIMAX_API_KEY later in your agent/OpenRedou UI.');
+}
+console.log('Pasteable agent config is available with: node dist/index.js --agent-config');
+console.log('Restart OpenCode, then ask it to list MCP tools or use list_voices/text_to_image/text_to_audio.');

@@ -46,7 +46,7 @@ export function loadConfig() {
         defaultPollIntervalSeconds: numberFromEnv("MINIMAX_POLL_INTERVAL_SECONDS", 10),
         defaultMaxWaitSeconds: numberFromEnv("MINIMAX_MAX_WAIT_SECONDS", 600),
         t2aMode: t2aModeRaw === "websocket" ? "websocket" : "async",
-        enableTokenPlanProxy: boolFromEnv("MINIMAX_ENABLE_TOKEN_PLAN_PROXY", true),
+        enableTokenPlanProxy: boolFromEnv("MINIMAX_ENABLE_TOKEN_PLAN_PROXY", false),
         tokenPlanApiKey: process.env.MINIMAX_PLAN_API_KEY || process.env.MINIMAX_API_KEY || "",
         tokenPlanCommand: process.env.MINIMAX_PLAN_MCP_COMMAND || "uvx",
         tokenPlanArgs: parseArgs(process.env.MINIMAX_PLAN_MCP_ARGS, ["minimax-coding-plan-mcp", "-y"]),

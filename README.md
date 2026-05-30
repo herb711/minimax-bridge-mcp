@@ -1,207 +1,137 @@
 # minimax-bridge-mcp
 
-> 专为 MiniMax Token Plan 用户打造的 MCP 服务器，让 OpenCode、Codex 等 AI 编程助手直接调用 MiniMax 的全部 AI 能力。
+MiniMax Bridge MCP is a local stdio MCP server that exposes MiniMax multimodal tools to OpenRedou, OpenCode, Codex, and other MCP-capable agents.
 
-## 这是什么？
+The installer no longer asks for a MiniMax API key. Install the bridge first, then paste the generated agent config into your agent or OpenRedou MCP settings and enter the API key in that UI.
 
-一个桥接服务器，将 MiniMax 的 API 能力（文生图、文生语音、视频生成、音乐创作等）封装成 MCP 工具，让 AI 编程助手可以像使用内置工具一样调用。
+## Tools
 
-**支持的工具：**
-- 文生图 / 文生语音 / 语音克隆
-- 视频生成 / 图生视频
-- 音乐创作 / 歌词生成
-- 网页搜索 / 图片理解
+- `text_to_audio`, `query_text_to_audio`, `list_voices`, `voice_clone`
+- `text_to_image`
+- `generate_video`, `image_to_video`, `query_video_generation`
+- `video_template_generation`, `query_video_template_generation`
+- `lyrics_generation`, `music_generation`, `music_cover_preprocess`
+- `web_search`, `understand_image` when the optional MiniMax Token Plan proxy is enabled
 
-## 快速安装
+## Requirements
 
-### 前提条件
+- Node.js 20 or newer
+- A MiniMax API key, configured later in the agent/OpenRedou UI
 
-- Node.js 20+ ([下载](https://nodejs.org/))
-- MiniMax API Key
+## Install From Release
 
-### 一键安装
+1. Download the bundle for your system from GitHub Releases:
+   - Windows: `minimax-bridge-mcp-0.1.6-win-x64.zip`
+   - macOS: `minimax-bridge-mcp-0.1.6-macos-universal.tar.gz`
+   - Linux: `minimax-bridge-mcp-0.1.6-linux-x64.tar.gz`
+2. Extract it to a stable local folder.
+3. Run the installer.
 
-**Windows：**
+Windows PowerShell:
+
 ```powershell
-# 下载解压后，双击 install.bat 即可
+cd D:\Redou\plugins\minimax-bridge-mcp
+.\install-opencode.ps1 -Yes
 ```
 
-**macOS / Linux：**
+Windows double-click:
+
+```text
+Double-click install.bat
+```
+
+macOS / Linux:
+
 ```bash
+cd ~/redou/plugins/minimax-bridge-mcp
 chmod +x install.sh
 ./install.sh
 ```
 
-安装脚本会自动检测环境、安装依赖、配置 OpenCode。
+The installer writes a local MCP entry without `MINIMAX_API_KEY`. It is safe to run on a shared machine because no secret is required at install time.
 
-### 手动安装
+## Print Agent Config
+
+After install or build, print a pasteable config block:
 
 ```bash
-npm install
-npm run build
-node scripts/install-opencode.mjs --apiKey YOUR_API_KEY --yes
+node dist/index.js --agent-config
 ```
 
-## 使用示例
-
-安装完成后，重启 OpenCode，即可在对话中使用 MiniMax 的能力。
-
-### 示例 1：文生图
-
-```
-用户：帮我生成一张赛博朋克风格的城市夜景图
-OpenCode：[调用 text_to_image 工具]
-```
-
-### 示例 2：文生语音
-
-```
-用户：把这段代码的注释用语音读出来
-OpenCode：[调用 text_to_audio 工具]
-```
-
-### 示例 3：视频生成
-
-```
-用户：根据这个动画效果生成一个演示视频
-OpenCode：[调用 generate_video 工具]
-```
-
-### 示例 4：网页搜索
-
-```
-用户：搜索一下最新的 React 19 有什么新特性
-OpenCode：[调用 web_search 工具]
-```
-
-## 配置说明
-
-安装脚本会自动将以下配置写入 `~/.config/opencode/opencode.json`：
+The output looks like this:
 
 ```json
 {
+  "schemaVersion": "redou.agent.mcp.config/v1",
   "mcp": {
     "minimax-bridge": {
       "type": "local",
-      "command": ["node", "/path/to/minimax-bridge-mcp/dist/index.js"],
+      "command": ["node", "D:\\Redou\\plugins\\minimax-bridge-mcp\\dist\\index.js"],
       "enabled": true,
       "environment": {
-        "MINIMAX_API_KEY": "your_api_key"
+        "MINIMAX_API_HOST": "https://api.minimaxi.com",
+        "MINIMAX_MCP_BASE_PATH": "D:\\Redou\\plugins\\minimax-bridge-mcp\\outputs\\minimax",
+        "MINIMAX_T2A_MODE": "async",
+        "MINIMAX_ENABLE_TOKEN_PLAN_PROXY": "false"
       }
+    }
+  },
+  "secrets": {
+    "MINIMAX_API_KEY": {
+      "required": true
     }
   }
 }
 ```
 
-如需修改配置，可编辑该文件。
+Paste this block into OpenRedou's MCP settings page, then fill the separate MiniMax API Key field. Do not paste the API key into shared config files.
 
-## 相关链接
-
-- [详细安装指南](docs/OPENCODE_INSTALL.md)
-- [GitHub Releases](https://github.com/herb711/minimax-bridge-mcp/releases)
-
----
-
-# English
-
-# minimax-bridge-mcp
-
-> A bridge server that brings MiniMax's AI capabilities (text-to-image, text-to-speech, video generation, music creation, etc.) to AI coding assistants like OpenCode and Codex via MCP protocol.
-
-## What is this?
-
-A bridge server that wraps MiniMax's APIs as MCP tools, allowing AI coding assistants to use MiniMax's capabilities as if they were built-in tools.
-
-**Supported tools:**
-- Text-to-Image / Text-to-Speech / Voice Cloning
-- Video Generation / Image-to-Video
-- Music Creation / Lyrics Generation
-- Web Search / Image Understanding
-
-## Quick Install
-
-### Prerequisites
-
-- Node.js 20+ ([Download](https://nodejs.org/))
-- MiniMax API Key
-
-### One-click Install
-
-**Windows:**
-```powershell
-# After downloading and extracting, double-click install.bat
-```
-
-**macOS / Linux:**
-```bash
-chmod +x install.sh
-./install.sh
-```
-
-The install script automatically detects the environment, installs dependencies, and configures OpenCode.
-
-### Manual Install
+## Manual OpenCode Install
 
 ```bash
 npm install
 npm run build
-node scripts/install-opencode.mjs --apiKey YOUR_API_KEY --yes
+node scripts/install-opencode.mjs --yes
 ```
 
-## Usage Examples
+Optional advanced install with a key explicitly written to OpenCode:
 
-After installation, restart OpenCode and you can use MiniMax's capabilities in your conversations.
-
-### Example 1: Text-to-Image
-
-```
-User: Generate a cyberpunk city nightscape image
-OpenCode: [calls text_to_image tool]
+```bash
+node scripts/install-opencode.mjs --yes --apiKey YOUR_MINIMAX_API_KEY
 ```
 
-### Example 2: Text-to-Speech
+Only use `--apiKey` on a private machine where storing the key in the local OpenCode config is acceptable.
 
-```
-User: Read the code comments aloud
-OpenCode: [calls text_to_audio tool]
-```
+## Verify
 
-### Example 3: Video Generation
-
-```
-User: Generate a demo video based on this animation effect
-OpenCode: [calls generate_video tool]
+```bash
+npm run build
+node dist/index.js --tools
+node dist/index.js --manifest
+node dist/index.js --agent-config
 ```
 
-### Example 4: Web Search
+`--tools`, `--manifest`, and `--agent-config` do not require an API key.
 
-```
-User: Search for the latest React 19 features
-OpenCode: [calls web_search tool]
-```
+## OpenRedou Configuration
 
-## Configuration
+1. Open OpenRedou settings.
+2. Go to MCP settings.
+3. Paste the JSON printed by `node dist/index.js --agent-config`.
+4. Enter the MiniMax API key in the MiniMax API Key field.
+5. Save, then run the connection and tool probe tests.
 
-The install script automatically writes the following config to `~/.config/opencode/opencode.json`:
+## Optional Token Plan Proxy
 
-```json
-{
-  "mcp": {
-    "minimax-bridge": {
-      "type": "local",
-      "command": ["node", "/path/to/minimax-bridge-mcp/dist/index.js"],
-      "enabled": true,
-      "environment": {
-        "MINIMAX_API_KEY": "your_api_key"
-      }
-    }
-  }
-}
+The Token Plan branch is disabled by default:
+
+```text
+MINIMAX_ENABLE_TOKEN_PLAN_PROXY=false
 ```
 
-To modify the configuration, edit this file.
+Enable it only if you have the MiniMax Token Plan MCP available and you have configured `MINIMAX_PLAN_API_KEY`.
 
 ## Links
 
-- [Detailed Installation Guide](docs/OPENCODE_INSTALL.md)
+- [Detailed OpenCode install guide](docs/OPENCODE_INSTALL.md)
 - [GitHub Releases](https://github.com/herb711/minimax-bridge-mcp/releases)

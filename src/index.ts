@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
@@ -12,10 +14,18 @@ import { errorToJson } from "./errors.js";
 import { MiniMaxHttpClient } from "./minimaxHttp.js";
 import { TokenPlanProxy } from "./tokenPlanProxy.js";
 import { TOOLS } from "./toolSchemas.js";
-import { getAgentManifest } from "./manifest.js";
+import { getAgentConfig, getAgentManifest } from "./manifest.js";
+
+const VERSION = "0.1.6";
+const installDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 if (process.argv.includes("--manifest")) {
   console.log(JSON.stringify(getAgentManifest(), null, 2));
+  process.exit(0);
+}
+
+if (process.argv.includes("--agent-config")) {
+  console.log(JSON.stringify(getAgentConfig(installDir), null, 2));
   process.exit(0);
 }
 
@@ -30,7 +40,7 @@ const minimax = new MiniMaxHttpClient(config, store);
 const tokenPlan = new TokenPlanProxy(config);
 
 const server = new Server(
-  { name: "minimax-bridge-mcp", version: "0.2.0" },
+  { name: "minimax-bridge-mcp", version: VERSION },
   { capabilities: { tools: {} } },
 );
 

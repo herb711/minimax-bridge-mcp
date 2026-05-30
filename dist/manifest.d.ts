@@ -1,3 +1,31 @@
+export declare function getAgentConfig(installDir?: string): {
+    schemaVersion: string;
+    name: string;
+    description: string;
+    mcp: {
+        "minimax-bridge": {
+            type: string;
+            command: string[];
+            enabled: boolean;
+            environment: {
+                MINIMAX_API_HOST: string;
+                MINIMAX_MCP_BASE_PATH: string;
+                MINIMAX_T2A_MODE: string;
+                MINIMAX_ENABLE_TOKEN_PLAN_PROXY: string;
+            };
+        };
+    };
+    secrets: {
+        MINIMAX_API_KEY: {
+            required: boolean;
+            description: string;
+        };
+        MINIMAX_PLAN_API_KEY: {
+            required: boolean;
+            description: string;
+        };
+    };
+};
 export declare function getAgentManifest(): {
     schemaVersion: string;
     id: string;
@@ -56,9 +84,16 @@ export declare function getAgentManifest(): {
     };
     capabilities: {
         tools: {
-            name: any;
-            description: any;
-            inputSchema: any;
+            name: string;
+            description: string | undefined;
+            inputSchema: {
+                [x: string]: unknown;
+                type: "object";
+                properties?: {
+                    [x: string]: object;
+                } | undefined;
+                required?: string[] | undefined;
+            };
         }[];
         artifacts: string[];
         providers: string[];

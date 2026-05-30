@@ -1,7 +1,7 @@
 {
   "id": "redou-minimax-bridge",
   "name": "MiniMax Bridge",
-  "version": "0.2.0",
+  "version": "0.1.6",
   "description": "Expose MiniMax Token Plan MCP tools and MiniMax HTTP/WebSocket multimodal tools as one MCP server.",
   "mcp": {
     "type": "stdio",
@@ -42,7 +42,8 @@
   "envSchema": {
     "MINIMAX_API_KEY": {
       "type": "secret",
-      "required": true
+      "required": false,
+      "description": "Configure this later in your agent/OpenRedou UI."
     },
     "MINIMAX_API_HOST": {
       "type": "string",

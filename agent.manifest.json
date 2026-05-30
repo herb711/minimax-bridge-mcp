@@ -3,7 +3,7 @@
   "id": "minimax-bridge-mcp",
   "name": "minimax-bridge-mcp",
   "displayName": "MiniMax Bridge MCP",
-  "version": "0.2.0",
+  "version": "0.1.6",
   "description": "A single stdio MCP server that exposes MiniMax multimodal tools to agents. It routes Token Plan tools to MiniMax Token Plan MCP and routes generation tools to MiniMax HTTP/WebSocket APIs.",
   "transport": {
     "type": "stdio",
@@ -13,9 +13,9 @@
     ],
     "env": {
       "MINIMAX_API_KEY": {
-        "required": true,
+        "required": false,
         "secret": true,
-        "description": "MiniMax API key for HTTP/WebSocket generation APIs."
+        "description": "MiniMax API key. Configure this later in the agent/OpenRedou UI."
       },
       "MINIMAX_API_HOST": {
         "required": false,
@@ -758,6 +758,7 @@
     ],
     "notes": [
       "The MCP server must not print diagnostics to stdout because stdout is reserved for MCP JSON-RPC.",
+      "Installers do not require API keys. Secrets should be configured in the agent/OpenRedou UI.",
       "Generated files are written under MINIMAX_MCP_BASE_PATH unless output_directory is provided per tool."
     ]
   },
