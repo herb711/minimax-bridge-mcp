@@ -23,7 +23,14 @@ function copy(src, dst) {
     for (const item of fs.readdirSync(src)) copy(path.join(src, item), path.join(dst, item));
   } else {
     fs.mkdirSync(path.dirname(dst), { recursive: true });
-    fs.copyFileSync(src, dst);
+    // 修复 .sh 文件的换行符：CRLF -> LF
+    if (src.endsWith('.sh')) {
+      let content = fs.readFileSync(src, 'utf8');
+      content = content.replace(/\r\n/g, '\n');
+      fs.writeFileSync(dst, content, 'utf8');
+    } else {
+      fs.copyFileSync(src, dst);
+    }
   }
 }
 
